@@ -1,76 +1,122 @@
-from flask import Flask, request
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title> Droplet-- Water Tracker 💧</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&display=swap');
 
-app = Flask(__name__)
+        body {
+            font-family: 'Playfair Display', serif;
+            background: #dceef2;
+            color: #000303;
+            text-align: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
 
-# Set your daily goal in ml
-DAILY_GOAL = 2000
+        .main-title {
+            font-size: 3.2em;
+            color: #00090d;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 1px 2px 3px rgba(0, 0, 0, 0.15);
+            margin-bottom: 20px;
+            transition: transform 0.2s ease;
+        }
 
-# In-memory storage
-water_log = []
-total_intake = 0
+        .main-title:hover {
+            transform: scale(1.02);
+        }
 
-@app.route("/", methods=["GET", "POST"])
-def home():
-    global total_intake
+        .dash {
+            color: #7aaeb7;
+            font-weight: 500;
+        }
 
-    if request.method == "POST":
-        amount = request.form.get("amount")
-        if amount:
-            try:
-                ml = int(amount)
-                water_log.append(f"{ml} ml")
-                total_intake += ml
-            except ValueError:
-                pass
+        form {
+            margin: 20px auto;
+            max-width: 400px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
 
-    log_html = "<br>".join(water_log)
-    remaining = max(0, DAILY_GOAL - total_intake)
-    progress = min(100, int((total_intake / DAILY_GOAL) * 100))
+        input[type="number"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #a2cfe3;
+            border-radius: 8px;
+            width: 50%;
+        }
 
-    return f"""
-        <html>
-        <head>
-            <title>Water Tracker</title>
-            <style>
-                .progress-bar {{
-                    width: 100%;
-                    background-color: #ddd;
-                    border-radius: 10px;
-                    overflow: hidden;
-                    height: 30px;
-                    margin-bottom: 10px;
-                }}
-                .progress {{
-                    height: 100%;
-                    background-color: #4CAF50;
-                    width: {progress}%;
-                    text-align: center;
-                    color: white;
-                    line-height: 30px;
-                    font-weight: bold;
-                }}
-            </style>
-        </head>
-        <body>
-            <h1>Water Tracker 💧</h1>
-            <form method="POST">
-                <input type="number" name="amount" placeholder="Amount in ml" required>
-                <button type="submit">Add</button>
-            </form>
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #246f91;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
 
-            <h2>Daily Goal: {DAILY_GOAL} ml</h2>
-            <p><strong>Total Drunk:</strong> {total_intake} ml</p>
-            <p><strong>Remaining:</strong> {remaining} ml</p>
+        button:hover {
+            background-color: #1b4e66;
+        }
 
-            <div class="progress-bar">
-                <div class="progress">{progress}%</div>
-            </div>
+        .stats {
+            margin-top: 30px;
+        }
 
-            <h2>Water Log:</h2>
-            {log_html}
-        </body>
-        </html>
-    """
+        .stats p {
+            font-size: 18px;
+            margin: 8px 0;
+        }
 
-if __name__ == "__main__":
-    app.run(debug=True)
+        .log {
+            margin-top: 30px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+        }
+
+        .log-entry {
+            font-size: 16px;
+            margin: 4px 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="main-title">Droplet <span class="dash">--</span> Water Tracker 💧</h1>
+
+    <form method="POST" action="/">
+        <input type="number" name="amount" placeholder="Amount in ml" required>
+        <button type="submit">Add</button>
+    </form>
+
+    <h2>Daily Goal: {{ DAILY_GOAL }} ml</h2>
+    <p><strong>Total Drunk:</strong> {{ total_intake }} ml</p>
+    <p><strong>Remaining:</strong> {{ remaining }} ml</p>
+
+    <div class="progress-bar" style="background: #e0e0e0; border-radius: 8px; height: 30px; width: 400px; margin: 20px auto;">
+        <div class="progress" style="background: #7aaeb7; height: 100%; width: {{ progress }}%; border-radius: 8px; color: #fff; line-height: 30px;">
+            {{ progress }}%
+        </div>
+    </div>
+
+    <h2>Water Log:</h2>
+    <ul style="list-style: none; padding: 0;">
+        {% for entry in log %}
+            <li class="log-entry">{{ entry.amount }} ml at {{ entry.time }}</li>
+        {% endfor %}
+    </ul>
+
+    <p>Track your daily water intake effortlessly!</p>
+</body>
+</html>
